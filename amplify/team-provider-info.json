@@ -1,0 +1,33 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-climb-dev-9906f-authRole",
+      "UnauthRoleArn": "arn:aws:iam::537124951115:role/amplify-climb-dev-9906f-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::537124951115:role/amplify-climb-dev-9906f-authRole",
+      "Region": "us-west-1",
+      "DeploymentBucketName": "amplify-climb-dev-9906f-deployment",
+      "UnauthRoleName": "amplify-climb-dev-9906f-unauthRole",
+      "StackName": "amplify-climb-dev-9906f",
+      "StackId": "arn:aws:cloudformation:us-west-1:537124951115:stack/amplify-climb-dev-9906f/8ad24a60-8e50-11ef-9ec2-06b5fe358ed5",
+      "AmplifyAppId": "d3m0u8xtms1lc"
+    },
+    "categories": {
+      "function": {
+        "climb22223344": {},
+        "CognitoTriggersLambda": {
+          "deploymentBucketName": "amplify-climb-dev-9906f-deployment",
+          "s3Key": "amplify-builds/CognitoTriggersLambda-485669346c704b714862-build.zip",
+          "myApiClimbGraphqlapiendpointoutput": "https://fqaquhx4irazdppkluu5w3ril4.appsync-api.us-west-1.amazonaws.com/graphql",
+          "myApiKey": "da2-fgd4amptnjbuxayffbkcp26s2m",
+          "myAwsRegion": "us-west-1"
+        }
+      },
+      "auth": {
+        "climbfe039ccf": {}
+      },
+      "api": {
+        "climb": {}
+      }
+    }
+  }
+}

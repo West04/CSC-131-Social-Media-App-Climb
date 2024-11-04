@@ -1,0 +1,95 @@
+{
+  "api": {
+    "climb": {
+      "dependsOn": [],
+      "output": {
+        "authConfig": {
+          "additionalAuthenticationProviders": [],
+          "defaultAuthentication": {
+            "apiKeyConfig": {
+              "apiKeyExpirationDays": 7
+            },
+            "authenticationType": "API_KEY"
+          }
+        }
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "AppSync"
+    }
+  },
+  "auth": {
+    "climbfe039ccf": {
+      "customAuth": false,
+      "dependsOn": [],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyCharacters": [],
+          "passwordPolicyMinLength": 8
+        },
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito"
+    }
+  },
+  "function": {
+    "CognitoTriggersLambda": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_CognitoTriggersLambda_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "CognitoTriggersLambda"
+        }
+      ]
+    },
+    "AMPLIFY_function_CognitoTriggersLambda_myApiClimbGraphqlapiendpointoutput": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "CognitoTriggersLambda"
+        }
+      ]
+    },
+    "AMPLIFY_function_CognitoTriggersLambda_myApiKey": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "CognitoTriggersLambda"
+        }
+      ]
+    },
+    "AMPLIFY_function_CognitoTriggersLambda_myAwsRegion": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "CognitoTriggersLambda"
+        }
+      ]
+    },
+    "AMPLIFY_function_CognitoTriggersLambda_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "CognitoTriggersLambda"
+        }
+      ]
+    }
+  }
+}
