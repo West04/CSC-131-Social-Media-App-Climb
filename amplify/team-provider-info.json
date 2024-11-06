@@ -16,7 +16,7 @@
         "climb22223344": {},
         "CognitoTriggersLambda": {
           "deploymentBucketName": "amplify-climb-dev-9906f-deployment",
-          "s3Key": "amplify-builds/CognitoTriggersLambda-485669346c704b714862-build.zip",
+          "s3Key": "amplify-builds/CognitoTriggersLambda-6c636750666f45566171-build.zip",
           "myApiClimbGraphqlapiendpointoutput": "https://fqaquhx4irazdppkluu5w3ril4.appsync-api.us-west-1.amazonaws.com/graphql",
           "myApiKey": "da2-fgd4amptnjbuxayffbkcp26s2m",
           "myAwsRegion": "us-west-1"
