@@ -2,6 +2,9 @@
 import React from 'react';
 import './App.css';
 
+
+// Hi
+
 // Imports the Authenticator and withAuthenticator components from '@aws-amplify/ui-react'.
 // Authenticator is a React component that provides a ready-to-use sign-in and sign-up UI.
 // withAuthenticator is a higher-order component that wraps your app component to enforce authentication.
