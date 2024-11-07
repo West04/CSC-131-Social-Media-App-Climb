@@ -26,6 +26,23 @@ function App() {
           {({ signOut }) => (
               <main>
                 <header className='App-header'>
+
+                    {/* Home Page Box */}
+                    <div style={{
+                        padding: '10px',
+                        backgroundColor: '#f0f0f0',
+                        border: '1px solid #ddd',
+                        borderRadius: '5px',
+                        width: '200px',
+                        margin: '20px auto',
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        color: "black",
+                        textAlign: 'center'
+                    }}>
+                        Home Page
+                    </div>
+
                   {/* Sign Out Button */}
                   <button
                       onClick={signOut}

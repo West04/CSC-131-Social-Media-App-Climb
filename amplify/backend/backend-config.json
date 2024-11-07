@@ -18,7 +18,7 @@
     }
   },
   "auth": {
-    "climbfe039ccf": {
+    "climb083e823d": {
       "customAuth": false,
       "dependsOn": [],
       "frontendAuthConfig": {
@@ -43,53 +43,5 @@
       "service": "Cognito"
     }
   },
-  "function": {
-    "CognitoTriggersLambda": {
-      "build": true,
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    }
-  },
-  "parameters": {
-    "AMPLIFY_function_CognitoTriggersLambda_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "CognitoTriggersLambda"
-        }
-      ]
-    },
-    "AMPLIFY_function_CognitoTriggersLambda_myApiClimbGraphqlapiendpointoutput": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "CognitoTriggersLambda"
-        }
-      ]
-    },
-    "AMPLIFY_function_CognitoTriggersLambda_myApiKey": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "CognitoTriggersLambda"
-        }
-      ]
-    },
-    "AMPLIFY_function_CognitoTriggersLambda_myAwsRegion": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "CognitoTriggersLambda"
-        }
-      ]
-    },
-    "AMPLIFY_function_CognitoTriggersLambda_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "CognitoTriggersLambda"
-        }
-      ]
-    }
-  }
+  "function": {}
 }

@@ -2,11 +2,9 @@
 # all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
 input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONLY!
 
-# Created By DevTeam
-# User Table in DynamoDB
 type User @model {
-  id: ID!
-  username: String!
-  email: String!
-  createdAt: AWSDateTime
+    id: ID!
+    username: String!
+    email: String!
+    createdAt: AWSDateTime
 }
