@@ -28,10 +28,12 @@ export default function UserUpdateForm(props) {
     username: "",
     email: "",
     createdAt: "",
+    updatedAt: "",
   };
   const [username, setUsername] = React.useState(initialValues.username);
   const [email, setEmail] = React.useState(initialValues.email);
   const [createdAt, setCreatedAt] = React.useState(initialValues.createdAt);
+  const [updatedAt, setUpdatedAt] = React.useState(initialValues.updatedAt);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = userRecord
@@ -40,6 +42,7 @@ export default function UserUpdateForm(props) {
     setUsername(cleanValues.username);
     setEmail(cleanValues.email);
     setCreatedAt(cleanValues.createdAt);
+    setUpdatedAt(cleanValues.updatedAt);
     setErrors({});
   };
   const [userRecord, setUserRecord] = React.useState(userModelProp);
@@ -62,6 +65,7 @@ export default function UserUpdateForm(props) {
     username: [{ type: "Required" }],
     email: [{ type: "Required" }],
     createdAt: [],
+    updatedAt: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -109,6 +113,7 @@ export default function UserUpdateForm(props) {
           username,
           email,
           createdAt: createdAt ?? null,
+          updatedAt: updatedAt ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -172,6 +177,7 @@ export default function UserUpdateForm(props) {
               username: value,
               email,
               createdAt,
+              updatedAt,
             };
             const result = onChange(modelFields);
             value = result?.username ?? value;
@@ -198,6 +204,7 @@ export default function UserUpdateForm(props) {
               username,
               email: value,
               createdAt,
+              updatedAt,
             };
             const result = onChange(modelFields);
             value = result?.email ?? value;
@@ -226,6 +233,7 @@ export default function UserUpdateForm(props) {
               username,
               email,
               createdAt: value,
+              updatedAt,
             };
             const result = onChange(modelFields);
             value = result?.createdAt ?? value;
@@ -239,6 +247,35 @@ export default function UserUpdateForm(props) {
         errorMessage={errors.createdAt?.errorMessage}
         hasError={errors.createdAt?.hasError}
         {...getOverrideProps(overrides, "createdAt")}
+      ></TextField>
+      <TextField
+        label="Updated at"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={updatedAt && convertToLocal(new Date(updatedAt))}
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : new Date(e.target.value).toISOString();
+          if (onChange) {
+            const modelFields = {
+              username,
+              email,
+              createdAt,
+              updatedAt: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.updatedAt ?? value;
+          }
+          if (errors.updatedAt?.hasError) {
+            runValidationTasks("updatedAt", value);
+          }
+          setUpdatedAt(value);
+        }}
+        onBlur={() => runValidationTasks("updatedAt", updatedAt)}
+        errorMessage={errors.updatedAt?.errorMessage}
+        hasError={errors.updatedAt?.hasError}
+        {...getOverrideProps(overrides, "updatedAt")}
       ></TextField>
       <Flex
         justifyContent="space-between"
