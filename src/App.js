@@ -1,9 +1,6 @@
 // Imports
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
-
-
-// Hi
 
 // Imports the Authenticator and withAuthenticator components from '@aws-amplify/ui-react'.
 // Authenticator is a React component that provides a ready-to-use sign-in and sign-up UI.
@@ -19,51 +16,123 @@ import awsExports from './aws-exports';
 // Imports the Amplify library from 'aws-amplify' package. This is used to configure your app to interact with AWS services.
 import { Amplify } from 'aws-amplify';
 
+
 // Configures the Amplify library with the settings from aws-exports.js, which includes all the AWS service configurations for this project.
 Amplify.configure(awsExports);
 
 function App() {
-  return (
-      <div className="App">
-        <Authenticator>
-          {({ signOut }) => (
-              <main>
-                <header className='App-header'>
+    const [backgroundColor, setBackgroundColor] = useState('#f0f0f0');
+    const [showHomeContent, setShowHomeContent] = useState(false);
+    const [showInitContent, setShowInitContent] = useState(true);
 
-                    {/* Home Page Box */}
-                    <div style={{
-                        padding: '10px',
-                        backgroundColor: '#f0f0f0',
-                        border: '1px solid #ddd',
-                        borderRadius: '5px',
-                        width: '200px',
-                        margin: '20px auto',
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        color: "black",
-                        textAlign: 'center'
-                    }}>
-                        Home Page
-                    </div>
+    const handleHomePageClick = () => {
+        setBackgroundColor('#008000'); // Dark green background
+        setShowHomeContent(true);
+        setShowInitContent(false);
+    };
 
-                  {/* Sign Out Button */}
-                  <button
-                      onClick={signOut}
-                      style={{
-                        margin: '20px',
-                        fontSize: '0.8rem',
-                        padding: '5px 10px',
-                        marginTop: '20px'
-                      }}
-                  >
-                    Sign Out
-                  </button>
-                </header>
-              </main>
-          )}
-        </Authenticator>
-      </div>
-  );
+    return (
+        <div className="App">
+            <Authenticator>
+                {({ signOut }) => (
+                    <main>
+                        {showInitContent && (
+                            <header className='App-header'>
+
+                                <button
+                                    onClick={handleHomePageClick}
+                                    style={{
+                                        padding: '10px',
+                                        backgroundColor: '#f0f0f0',
+                                        border: '1px solid #ddd',
+                                        borderRadius: '5px',
+                                        width: '200px',
+                                        margin: '20px auto',
+                                        fontSize: '20px',
+                                        fontWeight: 'bold',
+                                        color: "black",
+                                        textAlign: 'center'
+                                    }}>
+                                    Home Page
+                                </button>
+
+
+                                {/* Sign Out Button */}
+                                <button
+                                    onClick={signOut}
+                                    style={{
+                                        margin: '20px',
+                                        fontSize: '0.8rem',
+                                        padding: '5px 10px',
+                                        marginTop: '20px'
+                                    }}
+                                >
+                                    Sign Out
+                                </button>
+
+                            </header>
+                        )}
+
+                        {showHomeContent && (
+                            <div style={{ height: '100vh', backgroundColor: '#008000' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: '100%',
+                                    flexDirection: 'column'
+                                }}>
+                                    <label htmlFor="postInput">Post</label>
+                                    <input
+                                        id="postInput"
+                                        type="text"
+                                        placeholder="Type your post here..."
+                                        style={{
+                                            width: '300px',
+                                            height: '100px',
+                                            backgroundColor: '#ffffff',
+                                            margin: '20px auto',
+                                            textAlign: 'center',
+                                            borderRadius: '5px',
+                                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                            padding: '10px'
+                                        }}
+                                    />
+                                    <label htmlFor="postInput">Search</label>
+                                    <input
+                                        id="postInput"
+                                        type="text"
+                                        placeholder="Type your search here..."
+                                        style={{
+                                            width: '300px',
+                                            height: '100px',
+                                            backgroundColor: '#ffffff',
+                                            margin: '20px auto',
+                                            textAlign: 'center',
+                                            borderRadius: '5px',
+                                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                            padding: '10px'
+                                        }}
+                                    />
+                                    <button
+                                        onClick={signOut}
+                                        style={{
+                                            margin: '20px',
+                                            fontSize: '0.8rem',
+                                            padding: '5px 10px',
+                                            marginTop: '20px'
+                                        }}
+                                    >
+                                        Sign Out
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+                )}
+            </Authenticator>
+        </div>
+    );
 }
 
 export default withAuthenticator(App);
