@@ -67,7 +67,7 @@ export const createPost = /* GraphQL */ `
       id
       title
       content
-      like
+      likes
       createdByID
       createdBy {
         id
@@ -77,9 +77,16 @@ export const createPost = /* GraphQL */ `
         updatedAt
         __typename
       }
+      topicID
+      topic {
+        id
+        title
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -93,7 +100,7 @@ export const updatePost = /* GraphQL */ `
       id
       title
       content
-      like
+      likes
       createdByID
       createdBy {
         id
@@ -103,9 +110,16 @@ export const updatePost = /* GraphQL */ `
         updatedAt
         __typename
       }
+      topicID
+      topic {
+        id
+        title
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -119,7 +133,7 @@ export const deletePost = /* GraphQL */ `
       id
       title
       content
-      like
+      likes
       createdByID
       createdBy {
         id
@@ -129,9 +143,70 @@ export const deletePost = /* GraphQL */ `
         updatedAt
         __typename
       }
+      topicID
+      topic {
+        id
+        title
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      owner
+      __typename
+    }
+  }
+`;
+export const createTopic = /* GraphQL */ `
+  mutation CreateTopic(
+    $input: CreateTopicInput!
+    $condition: ModelTopicConditionInput
+  ) {
+    createTopic(input: $input, condition: $condition) {
+      id
+      title
+      posts {
+        nextToken
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateTopic = /* GraphQL */ `
+  mutation UpdateTopic(
+    $input: UpdateTopicInput!
+    $condition: ModelTopicConditionInput
+  ) {
+    updateTopic(input: $input, condition: $condition) {
+      id
+      title
+      posts {
+        nextToken
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteTopic = /* GraphQL */ `
+  mutation DeleteTopic(
+    $input: DeleteTopicInput!
+    $condition: ModelTopicConditionInput
+  ) {
+    deleteTopic(input: $input, condition: $condition) {
+      id
+      title
+      posts {
+        nextToken
+        __typename
+      }
+      createdAt
+      updatedAt
       __typename
     }
   }

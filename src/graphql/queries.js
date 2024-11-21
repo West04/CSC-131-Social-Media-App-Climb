@@ -43,7 +43,7 @@ export const getPost = /* GraphQL */ `
       id
       title
       content
-      like
+      likes
       createdByID
       createdBy {
         id
@@ -53,9 +53,16 @@ export const getPost = /* GraphQL */ `
         updatedAt
         __typename
       }
+      topicID
+      topic {
+        id
+        title
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -71,11 +78,11 @@ export const listPosts = /* GraphQL */ `
         id
         title
         content
-        like
+        likes
         createdByID
+        topicID
         createdAt
         updatedAt
-        owner
         __typename
       }
       nextToken
@@ -83,18 +90,50 @@ export const listPosts = /* GraphQL */ `
     }
   }
 `;
-export const postsByCreatedByIDAndCreatedAt = /* GraphQL */ `
-  query PostsByCreatedByIDAndCreatedAt(
+export const getTopic = /* GraphQL */ `
+  query GetTopic($id: ID!) {
+    getTopic(id: $id) {
+      id
+      title
+      posts {
+        nextToken
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listTopics = /* GraphQL */ `
+  query ListTopics(
+    $filter: ModelTopicFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listTopics(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        title
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const postsByCreatedByID = /* GraphQL */ `
+  query PostsByCreatedByID(
     $createdByID: ID!
-    $createdAt: ModelStringKeyConditionInput
     $sortDirection: ModelSortDirection
     $filter: ModelPostFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    postsByCreatedByIDAndCreatedAt(
+    postsByCreatedByID(
       createdByID: $createdByID
-      createdAt: $createdAt
       sortDirection: $sortDirection
       filter: $filter
       limit: $limit
@@ -104,11 +143,42 @@ export const postsByCreatedByIDAndCreatedAt = /* GraphQL */ `
         id
         title
         content
-        like
+        likes
         createdByID
+        topicID
         createdAt
         updatedAt
-        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const postsByTopicID = /* GraphQL */ `
+  query PostsByTopicID(
+    $topicID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelPostFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    postsByTopicID(
+      topicID: $topicID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        title
+        content
+        likes
+        createdByID
+        topicID
+        createdAt
+        updatedAt
         __typename
       }
       nextToken
