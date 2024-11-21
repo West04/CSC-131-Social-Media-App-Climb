@@ -6,9 +6,7 @@ import awsExports from './aws-exports';
 import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/api';
 import { createTopic } from "./graphql/mutations";
-import { listTopics } from "./graphql/queries";
-import { ListTopicsWithPosts } from './graphql/custom-queries';
-
+import { ListTopicsWithPosts } from "./graphql/custom-queries";  // Updated import
 import TopicPage from './TopicPage';
 
 Amplify.configure(awsExports);
@@ -21,6 +19,7 @@ function App() {
     const [topic, setTopic] = useState('');
     const [topics, setTopics] = useState([]);
     const [selectedTopicId, setSelectedTopicId] = useState(null);
+    const [error, setError] = useState(null);  // Added error state
 
     useEffect(() => {
         if (showHomeContent) {
@@ -31,11 +30,13 @@ function App() {
     const fetchTopics = async () => {
         try {
             const topicData = await client.graphql({
-                query: listTopics
+                query: ListTopicsWithPosts  // Updated query
             });
             setTopics(topicData.data.listTopics.items);
+            setError(null);  // Clear any previous errors
         } catch (error) {
             console.error("Error fetching topics:", error);
+            setError("Failed to load topics. Please try again later.");
         }
     };
 
@@ -67,16 +68,17 @@ function App() {
         };
 
         try {
-            const response = await client.graphql({
+            await client.graphql({
                 query: createTopic,
                 variables: { input: topicInput }
             });
             alert("Topic created successfully!");
             setTopic('');
-            fetchTopics();
+            fetchTopics();  // Refresh the topics list
+            setError(null);  // Clear any previous errors
         } catch (error) {
             console.error("Error creating topic:", error);
-            alert("There was an error creating the topic. Please try again.");
+            setError("Failed to create topic. Please try again.");
         }
     };
 
@@ -111,19 +113,75 @@ function App() {
                                         }}>
                                         Home Page
                                     </button>
-                                    <button onClick={signOut} style={{
-                                        margin: '20px',
-                                        fontSize: '0.8rem',
-                                        padding: '5px 10px',
-                                        marginTop: '20px'
-                                    }}>
+                                    <button
+                                        onClick={handleHomePageClick}
+                                        style={{
+                                            padding: '10px',
+                                            backgroundColor: '#f0f0f0',
+                                            border: '1px solid #ddd',
+                                            borderRadius: '5px',
+                                            width: '200px',
+                                            margin: '20px auto',
+                                            fontSize: '20px',
+                                            fontWeight: 'bold',
+                                            color: "black",
+                                            textAlign: 'center'
+                                        }}>
+                                        Followed Topics
+                                    </button>
+                                    <button
+                                        onClick={handleHomePageClick}
+                                        style={{
+                                            padding: '10px',
+                                            backgroundColor: '#f0f0f0',
+                                            border: '1px solid #ddd',
+                                            borderRadius: '5px',
+                                            width: '200px',
+                                            margin: '20px auto',
+                                            fontSize: '20px',
+                                            fontWeight: 'bold',
+                                            color: "black",
+                                            textAlign: 'center'
+                                        }}>
+                                        For You
+                                    </button>
+                                    <button
+                                        onClick={handleHomePageClick}
+                                        style={{
+                                            padding: '10px',
+                                            backgroundColor: '#f0f0f0',
+                                            border: '1px solid #ddd',
+                                            borderRadius: '5px',
+                                            width: '200px',
+                                            margin: '20px auto',
+                                            fontSize: '20px',
+                                            fontWeight: 'bold',
+                                            color: "black",
+                                            textAlign: 'center'
+                                        }}>
+                                        Your Posts
+                                    </button>
+                                    <button
+                                        onClick={signOut}
+                                        style={{
+                                            padding: '10px',
+                                            backgroundColor: '#f0f0f0',
+                                            border: '1px solid #ddd',
+                                            borderRadius: '5px',
+                                            width: '200px',
+                                            margin: '20px auto',
+                                            fontSize: '20px',
+                                            fontWeight: 'bold',
+                                            color: "black",
+                                            textAlign: 'center'
+                                        }}>
                                         Sign Out
                                     </button>
                                 </header>
                             )}
 
                             {showHomeContent && !selectedTopicId && (
-                                <div style={{ height: '100vh', backgroundColor: '#008000' }}>
+                                <div style={{height: '100vh', backgroundColor: '#008000'}}>
                                     {/* ... rest of your home content code ... */}
                                     <div style={{
                                         display: 'flex',
@@ -195,6 +253,7 @@ function App() {
                                             overflowY: 'auto',
                                         }}>
                                             <h2 style={{ textAlign: 'center', color: '#333' }}>Popular Topics</h2>
+                                            {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                                 {topics.map((topic) => {
                                                     const postCount = topic.posts?.items?.length || 0;
