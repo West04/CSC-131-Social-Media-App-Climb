@@ -50,15 +50,12 @@ export const onDeleteUser = /* GraphQL */ `
   }
 `;
 export const onCreatePost = /* GraphQL */ `
-  subscription OnCreatePost(
-    $filter: ModelSubscriptionPostFilterInput
-    $owner: String
-  ) {
-    onCreatePost(filter: $filter, owner: $owner) {
+  subscription OnCreatePost($filter: ModelSubscriptionPostFilterInput) {
+    onCreatePost(filter: $filter) {
       id
       title
       content
-      like
+      likes
       createdByID
       createdBy {
         id
@@ -68,23 +65,27 @@ export const onCreatePost = /* GraphQL */ `
         updatedAt
         __typename
       }
+      topicID
+      topic {
+        id
+        title
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
 `;
 export const onUpdatePost = /* GraphQL */ `
-  subscription OnUpdatePost(
-    $filter: ModelSubscriptionPostFilterInput
-    $owner: String
-  ) {
-    onUpdatePost(filter: $filter, owner: $owner) {
+  subscription OnUpdatePost($filter: ModelSubscriptionPostFilterInput) {
+    onUpdatePost(filter: $filter) {
       id
       title
       content
-      like
+      likes
       createdByID
       createdBy {
         id
@@ -94,23 +95,27 @@ export const onUpdatePost = /* GraphQL */ `
         updatedAt
         __typename
       }
+      topicID
+      topic {
+        id
+        title
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
 `;
 export const onDeletePost = /* GraphQL */ `
-  subscription OnDeletePost(
-    $filter: ModelSubscriptionPostFilterInput
-    $owner: String
-  ) {
-    onDeletePost(filter: $filter, owner: $owner) {
+  subscription OnDeletePost($filter: ModelSubscriptionPostFilterInput) {
+    onDeletePost(filter: $filter) {
       id
       title
       content
-      like
+      likes
       createdByID
       createdBy {
         id
@@ -120,9 +125,61 @@ export const onDeletePost = /* GraphQL */ `
         updatedAt
         __typename
       }
+      topicID
+      topic {
+        id
+        title
+        createdAt
+        updatedAt
+        __typename
+      }
       createdAt
       updatedAt
-      owner
+      __typename
+    }
+  }
+`;
+export const onCreateTopic = /* GraphQL */ `
+  subscription OnCreateTopic($filter: ModelSubscriptionTopicFilterInput) {
+    onCreateTopic(filter: $filter) {
+      id
+      title
+      posts {
+        nextToken
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateTopic = /* GraphQL */ `
+  subscription OnUpdateTopic($filter: ModelSubscriptionTopicFilterInput) {
+    onUpdateTopic(filter: $filter) {
+      id
+      title
+      posts {
+        nextToken
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteTopic = /* GraphQL */ `
+  subscription OnDeleteTopic($filter: ModelSubscriptionTopicFilterInput) {
+    onDeleteTopic(filter: $filter) {
+      id
+      title
+      posts {
+        nextToken
+        __typename
+      }
+      createdAt
+      updatedAt
       __typename
     }
   }
