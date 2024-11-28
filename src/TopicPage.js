@@ -1,172 +1,222 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { createPost } from './graphql/mutations';
 import { GetTopicWithPosts } from './graphql/custom-queries';
+import { createPost, updatePost } from './graphql/mutations';
 
 const client = generateClient();
 
-function TopicPage({ topicId, onBack, userId }) {
+function TopicPage({ topicId, userId, onBack }) {
     const [topic, setTopic] = useState(null);
-    const [posts, setPosts] = useState([]);
-    const [newPostTitle, setNewPostTitle] = useState('');
-    const [newPostContent, setNewPostContent] = useState('');
-    const [loading, setLoading] = useState(true);
+    const [newPost, setNewPost] = useState({
+        title: '',
+        content: ''
+    });
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [postErrors, setPostErrors] = useState({
+        title: '',
+        content: ''
+    });
 
-    const fetchTopicAndPosts = useCallback(async () => {
+    // Memoized fetch function to prevent unnecessary re-renders
+    const fetchTopicDetails = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+
         try {
             const response = await client.graphql({
                 query: GetTopicWithPosts,
-                variables: { id: topicId },
+                variables: { id: topicId }
             });
-            const topicData = response.data.getTopic;
-            setTopic(topicData);
-            setPosts(topicData.posts?.items || []);
-            setLoading(false);
-            setError(null); // Clear any previous errors
-        } catch (error) {
-            console.error("Error fetching topic and posts:", error);
-            setError("Failed to load topic and posts. Please try again later.");
-            setLoading(false);
+
+            setTopic(response.data.getTopic);
+        } catch (err) {
+            console.error('Error fetching topic details:', err);
+            setError('Failed to load topic details. Please try again later.');
+        } finally {
+            setIsLoading(false);
         }
     }, [topicId]);
 
+    // Initial fetch and refetch mechanism
     useEffect(() => {
-        fetchTopicAndPosts();
-    }, [fetchTopicAndPosts]);
+        fetchTopicDetails();
+    }, [fetchTopicDetails]);
+
+    const handlePostInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewPost(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+        // Validate inputs
+        if (name === 'title') {
+            setPostErrors(prev => ({
+                ...prev,
+                title: value.trim().length < 3 ? 'Title must be at least 3 characters' : ''
+            }));
+        }
+
+        if (name === 'content') {
+            setPostErrors(prev => ({
+                ...prev,
+                content: value.trim().length < 10 ? 'Content must be at least 10 characters' : ''
+            }));
+        }
+    };
 
     const handleCreatePost = async () => {
-        if (newPostTitle.trim() === '' || newPostContent.trim() === '') {
-            alert("Please enter both a title and content for your post.");
+        // Validate all inputs before submission
+        const titleError = !newPost.title.trim() ? 'Title is required' :
+            (newPost.title.trim().length < 3 ? 'Title must be at least 3 characters' : '');
+        const contentError = !newPost.content.trim() ? 'Content is required' :
+            (newPost.content.trim().length < 10 ? 'Content must be at least 10 characters' : '');
+
+        if (titleError || contentError) {
+            setPostErrors({ title: titleError, content: contentError });
             return;
         }
+
+        setIsLoading(true);
+        setError(null);
 
         try {
             await client.graphql({
                 query: createPost,
                 variables: {
                     input: {
-                        title: newPostTitle,
-                        content: newPostContent,
+                        title: newPost.title.trim(),
+                        content: newPost.content.trim(),
                         likes: 0,
                         createdByID: userId,
-                        topicID: topicId,
-                    },
-                },
+                        topicID: topicId
+                    }
+                }
             });
 
-            setNewPostTitle('');
-            setNewPostContent('');
-            fetchTopicAndPosts();
-            setError(null); // Clear any previous errors
-        } catch (error) {
-            console.error("Error creating post:", error);
-            setError("Failed to create post. Please try again.");
+            // Reset post input and refresh topic details
+            setNewPost({ title: '', content: '' });
+            setPostErrors({ title: '', content: '' });
+            await fetchTopicDetails();
+        } catch (err) {
+            console.error('Error creating post:', err);
+            setError('Failed to create post. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    if (loading) return <div>Loading topic and posts...</div>;
-    if (error) return <div style={{ color: 'red' }}>{error}</div>;
-    if (!topic) return <div>Topic not found.</div>;
+    const handleLikePost = async (postId, currentLikes) => {
+        try {
+            await client.graphql({
+                query: updatePost,
+                variables: {
+                    input: {
+                        id: postId,
+                        likes: (currentLikes || 0) + 1
+                    }
+                }
+            });
+
+            // Optimistically update the likes
+            setTopic(prevTopic => ({
+                ...prevTopic,
+                posts: {
+                    ...prevTopic.posts,
+                    items: prevTopic.posts.items.map(post =>
+                        post.id === postId
+                            ? { ...post, likes: (post.likes || 0) + 1 }
+                            : post
+                    )
+                }
+            }));
+        } catch (err) {
+            console.error('Error liking post:', err);
+            setError('Failed to like post');
+        }
+    };
+
+    if (isLoading) return <div className="loading-spinner">Loading...</div>;
+    if (!topic) return null;
 
     return (
-        <div style={{ padding: '20px' }}>
+        <div className="topic-page">
             <button
                 onClick={onBack}
-                style={{
-                    marginBottom: '20px',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: '1px solid #ddd'
-                }}
+                className="back-button"
+                aria-label="Back to Topics"
             >
                 ← Back to Topics
             </button>
 
-            <h1 style={{ marginBottom: '30px' }}>{topic.title}</h1>
+            <h1>{topic.title}</h1>
 
-            <div style={{
-                backgroundColor: '#f5f5f5',
-                padding: '20px',
-                borderRadius: '8px',
-                marginBottom: '30px'
-            }}>
-                <h2 style={{ marginBottom: '15px' }}>Create a Post</h2>
-                <input
-                    type="text"
-                    value={newPostTitle}
-                    onChange={(e) => setNewPostTitle(e.target.value)}
-                    placeholder="Post title"
-                    style={{
-                        display: 'block',
-                        width: '100%',
-                        padding: '8px',
-                        marginBottom: '10px',
-                        borderRadius: '4px',
-                        border: '1px solid #ddd'
-                    }}
-                />
-                <textarea
-                    value={newPostContent}
-                    onChange={(e) => setNewPostContent(e.target.value)}
-                    placeholder="Post content"
-                    style={{
-                        display: 'block',
-                        width: '100%',
-                        padding: '8px',
-                        marginBottom: '10px',
-                        borderRadius: '4px',
-                        border: '1px solid #ddd',
-                        minHeight: '100px'
-                    }}
-                />
+            {error && <div className="error-banner">{error}</div>}
+
+            {/* Post Creation Form */}
+            <div className="create-post-section">
+                <div className="input-group">
+                    <input
+                        type="text"
+                        name="title"
+                        placeholder="Post Title"
+                        value={newPost.title}
+                        onChange={handlePostInputChange}
+                        className={`post-title-input ${postErrors.title ? 'input-error' : ''}`}
+                    />
+                    {postErrors.title && (
+                        <span className="error-text">{postErrors.title}</span>
+                    )}
+                </div>
+                <div className="input-group">
+                    <textarea
+                        name="content"
+                        placeholder="Write your post..."
+                        value={newPost.content}
+                        onChange={handlePostInputChange}
+                        className={`post-content-input ${postErrors.content ? 'input-error' : ''}`}
+                    />
+                    {postErrors.content && (
+                        <span className="error-text">{postErrors.content}</span>
+                    )}
+                </div>
                 <button
                     onClick={handleCreatePost}
-                    style={{
-                        padding: '8px 16px',
-                        backgroundColor: '#4CAF50',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                    }}
+                    disabled={isLoading}
+                    className="create-post-button"
                 >
-                    Create Post
+                    {isLoading ? 'Posting...' : 'Create Post'}
                 </button>
             </div>
 
-            <h2>Posts</h2>
-            {posts.length === 0 ? (
-                <p style={{ color: '#666', fontStyle: 'italic' }}>
-                    No posts yet. Be the first to create one!
-                </p>
-            ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    {posts.map((post) => (
-                        <div
-                            key={post.id}
-                            style={{
-                                backgroundColor: 'white',
-                                padding: '20px',
-                                borderRadius: '8px',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                            }}
-                        >
-                            <h3 style={{ marginBottom: '10px' }}>{post.title}</h3>
-                            <p style={{ marginBottom: '10px' }}>{post.content}</p>
-                            <div style={{
-                                color: '#666',
-                                fontSize: '0.9em',
-                                display: 'flex',
-                                justifyContent: 'space-between'
-                            }}>
-                                <span>By: {post.createdBy?.username || 'Anonymous'}</span>
-                                <span>Likes: {post.likes}</span>
+            {/* Posts List */}
+            <div className="posts-list">
+                <h2>Posts</h2>
+                {topic.posts.items.length === 0 ? (
+                    <p className="no-posts-message">No posts yet. Be the first to post!</p>
+                ) : (
+                    topic.posts.items.map(post => (
+                        <div key={post.id} className="post-item">
+                            <h3>{post.title}</h3>
+                            <p>{post.content}</p>
+                            <div className="post-metadata">
+                                <span>Posted by: {post.createdBy?.username || 'Anonymous'}</span>
+                                <div className="post-actions">
+                                    <button
+                                        onClick={() => handleLikePost(post.id, post.likes)}
+                                        className="like-button"
+                                        aria-label="Like post"
+                                    >
+                                        👍 {post.likes || 0}
+                                    </button>
+                                    <span>{new Date(post.createdAt).toLocaleString()}</span>
+                                </div>
                             </div>
                         </div>
-                    ))}
-                </div>
-            )}
+                    ))
+                )}
+            </div>
         </div>
     );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import './App.css';
 import { Authenticator, withAuthenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
@@ -6,328 +6,295 @@ import awsExports from './aws-exports';
 import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/api';
 import { createTopic } from "./graphql/mutations";
-import { ListTopicsWithPosts } from "./graphql/custom-queries";  // Updated import
+import { ListTopicsWithPosts } from "./graphql/custom-queries";
 import TopicPage from './TopicPage';
+import './TopicPageNatureTheme.css';
 
+
+// Initialize Amplify
 Amplify.configure(awsExports);
 const client = generateClient();
 
-function App() {
-    const [backgroundColor, setBackgroundColor] = useState('#f0f0f0');
-    const [showHomeContent, setShowHomeContent] = useState(false);
-    const [showInitContent, setShowInitContent] = useState(true);
-    const [topic, setTopic] = useState('');
-    const [topics, setTopics] = useState([]);
-    const [selectedTopicId, setSelectedTopicId] = useState(null);
-    const [error, setError] = useState(null);  // Added error state
+// Initial state for the app
+const initialState = {
+    backgroundColor: '#f0f0f0',
+    showHomeContent: false,
+    showInitContent: true,
+    topic: '',
+    topics: [],
+    selectedTopicId: null,
+    error: null,
+    isLoading: false
+};
 
+// Reducer function to manage complex state
+function appReducer(state, action) {
+    switch (action.type) {
+        case 'SET_HOME_CONTENT':
+            return {
+                ...state,
+                showHomeContent: action.payload,
+                showInitContent: !action.payload
+            };
+        case 'SET_SELECTED_TOPIC':
+            return {
+                ...state,
+                selectedTopicId: action.payload
+            };
+        case 'SET_TOPICS':
+            return {
+                ...state,
+                topics: action.payload,
+                error: null
+            };
+        case 'SET_ERROR':
+            return {
+                ...state,
+                error: action.payload
+            };
+        case 'SET_LOADING':
+            return {
+                ...state,
+                isLoading: action.payload
+            };
+        case 'SET_TOPIC_INPUT':
+            return {
+                ...state,
+                topic: action.payload
+            };
+        case 'RESET_TOPIC_INPUT':
+            return {
+                ...state,
+                topic: ''
+            };
+        default:
+            return state;
+    }
+}
+
+function App({ user, signOut }) {
+    const [state, dispatch] = useReducer(appReducer, initialState);
+    const [userId, setUserId] = useState("7f2c6cd3-82df-41a8-bc82-152538968f51");
+
+    // Update user ID when authenticated
     useEffect(() => {
-        if (showHomeContent) {
+        if (user?.attributes?.sub) {
+            const currentUserId = user.attributes.sub;
+            setUserId(currentUserId);
+            localStorage.setItem('userId', currentUserId);
+        }
+    }, [user]);
+
+    // Fetch topics when home content is shown
+    useEffect(() => {
+        if (state.showHomeContent) {
             fetchTopics();
         }
-    }, [showHomeContent]);
+    }, [state.showHomeContent]);
 
+    // Update userId from local storage on initial load
+    useEffect(() => {
+        const storedUserId = localStorage.getItem('userId');
+        if (storedUserId) {
+            setUserId(storedUserId);
+        }
+    }, []);
+
+    // Fetch topics from backend
     const fetchTopics = async () => {
+        dispatch({ type: 'SET_LOADING', payload: true });
+        dispatch({ type: 'SET_ERROR', payload: null });
+
         try {
             const topicData = await client.graphql({
-                query: ListTopicsWithPosts  // Updated query
+                query: ListTopicsWithPosts
             });
-            setTopics(topicData.data.listTopics.items);
-            setError(null);  // Clear any previous errors
+            dispatch({
+                type: 'SET_TOPICS',
+                payload: topicData.data.listTopics.items
+            });
         } catch (error) {
             console.error("Error fetching topics:", error);
-            setError("Failed to load topics. Please try again later.");
+            dispatch({
+                type: 'SET_ERROR',
+                payload: "Failed to load topics. Please try again later."
+            });
+        } finally {
+            dispatch({ type: 'SET_LOADING', payload: false });
         }
     };
 
+    // Handlers for different page navigation
     const handleHomePageClick = () => {
-        setBackgroundColor('#008000');
-        setShowHomeContent(true);
-        setShowInitContent(false);
-        setSelectedTopicId(null);
+        dispatch({ type: 'SET_HOME_CONTENT', payload: true });
+        dispatch({ type: 'SET_SELECTED_TOPIC', payload: null });
     };
 
     const handleBackButtonClick = () => {
-        setShowHomeContent(false);
-        setShowInitContent(true);
-        setSelectedTopicId(null);
+        dispatch({ type: 'SET_HOME_CONTENT', payload: false });
+        dispatch({ type: 'SET_SELECTED_TOPIC', payload: null });
     };
 
     const handleInputChange = (event) => {
-        setTopic(event.target.value);
+        dispatch({
+            type: 'SET_TOPIC_INPUT',
+            payload: event.target.value
+        });
     };
 
+    // Create new topic
     const handleCreateTopic = async () => {
-        if (topic.trim() === '') {
-            alert("Please enter a topic.");
+        const trimmedTopic = state.topic.trim();
+
+        if (trimmedTopic === '') {
+            dispatch({
+                type: 'SET_ERROR',
+                payload: "Please enter a topic."
+            });
             return;
         }
 
-        const topicInput = {
-            title: topic,
-        };
+        dispatch({ type: 'SET_LOADING', payload: true });
 
         try {
             await client.graphql({
                 query: createTopic,
-                variables: { input: topicInput }
+                variables: { input: { title: trimmedTopic } }
             });
+
+            dispatch({ type: 'RESET_TOPIC_INPUT' });
+            dispatch({ type: 'SET_ERROR', payload: null });
+
+            // Refetch topics to update list
+            await fetchTopics();
+
             alert("Topic created successfully!");
-            setTopic('');
-            fetchTopics();  // Refresh the topics list
-            setError(null);  // Clear any previous errors
         } catch (error) {
             console.error("Error creating topic:", error);
-            setError("Failed to create topic. Please try again.");
+            dispatch({
+                type: 'SET_ERROR',
+                payload: "Failed to create topic. Please try again."
+            });
+        } finally {
+            dispatch({ type: 'SET_LOADING', payload: false });
         }
     };
 
+    // Handle topic selection
     const handleTopicClick = (topicId) => {
-        setSelectedTopicId(topicId);
+        console.log("Selected Topic ID:", topicId);
+        console.log("Current User ID:", userId);
+        dispatch({ type: 'SET_SELECTED_TOPIC', payload: topicId });
     };
 
     return (
         <div className="App">
-            <Authenticator>
-                {({ signOut, user }) => {
-                    // Ensure user exists and has required attributes
-                    const userId = user?.attributes?.sub;
+            <main>
+                {state.showInitContent && (
+                    <header className='App-header'>
+                        {['Home Page', 'Followed Topics', 'For You', 'Your Posts'].map((buttonText) => (
+                            <button
+                                key={buttonText}
+                                onClick={handleHomePageClick}
+                                className="nav-button"
+                            >
+                                {buttonText}
+                            </button>
+                        ))}
+                        <button
+                            onClick={signOut}
+                            className="nav-button sign-out"
+                        >
+                            Sign Out
+                        </button>
+                    </header>
+                )}
 
-                    return (
-                        <main>
-                            {showInitContent && (
-                                <header className='App-header'>
-                                    <button
-                                        onClick={handleHomePageClick}
-                                        style={{
-                                            padding: '10px',
-                                            backgroundColor: '#f0f0f0',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '5px',
-                                            width: '200px',
-                                            margin: '20px auto',
-                                            fontSize: '20px',
-                                            fontWeight: 'bold',
-                                            color: "black",
-                                            textAlign: 'center'
-                                        }}>
-                                        Home Page
-                                    </button>
-                                    <button
-                                        onClick={handleHomePageClick}
-                                        style={{
-                                            padding: '10px',
-                                            backgroundColor: '#f0f0f0',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '5px',
-                                            width: '200px',
-                                            margin: '20px auto',
-                                            fontSize: '20px',
-                                            fontWeight: 'bold',
-                                            color: "black",
-                                            textAlign: 'center'
-                                        }}>
-                                        Followed Topics
-                                    </button>
-                                    <button
-                                        onClick={handleHomePageClick}
-                                        style={{
-                                            padding: '10px',
-                                            backgroundColor: '#f0f0f0',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '5px',
-                                            width: '200px',
-                                            margin: '20px auto',
-                                            fontSize: '20px',
-                                            fontWeight: 'bold',
-                                            color: "black",
-                                            textAlign: 'center'
-                                        }}>
-                                        For You
-                                    </button>
-                                    <button
-                                        onClick={handleHomePageClick}
-                                        style={{
-                                            padding: '10px',
-                                            backgroundColor: '#f0f0f0',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '5px',
-                                            width: '200px',
-                                            margin: '20px auto',
-                                            fontSize: '20px',
-                                            fontWeight: 'bold',
-                                            color: "black",
-                                            textAlign: 'center'
-                                        }}>
-                                        Your Posts
-                                    </button>
-                                    <button
-                                        onClick={signOut}
-                                        style={{
-                                            padding: '10px',
-                                            backgroundColor: '#f0f0f0',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '5px',
-                                            width: '200px',
-                                            margin: '20px auto',
-                                            fontSize: '20px',
-                                            fontWeight: 'bold',
-                                            color: "black",
-                                            textAlign: 'center'
-                                        }}>
-                                        Sign Out
-                                    </button>
-                                </header>
-                            )}
-
-                            {showHomeContent && !selectedTopicId && (
-                                <div style={{height: '100vh', backgroundColor: '#008000'}}>
-                                    {/* ... rest of your home content code ... */}
-                                    <div style={{
-                                        display: 'flex',
-                                        padding: '20px',
-                                        height: '100%',
-                                    }}>
-                                        {/* Left side - Topic Creation */}
-                                        <div style={{
-                                            flex: '1',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center',
-                                            padding: '20px',
-                                        }}>
-                                            <label htmlFor="topicInput">Create New Topic</label>
-                                            <input
-                                                id="topicInput"
-                                                type="text"
-                                                placeholder="Type your topic here..."
-                                                value={topic}
-                                                onChange={handleInputChange}
-                                                style={{
-                                                    width: '300px',
-                                                    height: '100px',
-                                                    backgroundColor: '#ffffff',
-                                                    margin: '20px auto',
-                                                    textAlign: 'center',
-                                                    borderRadius: '5px',
-                                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                                                    padding: '10px'
-                                                }}
-                                            />
-                                            <button
-                                                onClick={handleCreateTopic}
-                                                style={{
-                                                    margin: '20px',
-                                                    fontSize: '0.8rem',
-                                                    padding: '5px 10px',
-                                                }}>
-                                                Create Topic
-                                            </button>
-
-                                            <label htmlFor="postInput">Search</label>
-                                            <input
-                                                id="postInput"
-                                                type="text"
-                                                placeholder="Type your search here..."
-                                                style={{
-                                                    width: '300px',
-                                                    height: '100px',
-                                                    backgroundColor: '#ffffff',
-                                                    margin: '20px auto',
-                                                    textAlign: 'center',
-                                                    borderRadius: '5px',
-                                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                                                    padding: '10px'
-                                                }}
-                                            />
-                                        </div>
-
-                                        {/* Right side - Topics List */}
-                                        <div style={{
-                                            flex: '1',
-                                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                            borderRadius: '10px',
-                                            padding: '20px',
-                                            margin: '20px',
-                                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                                            overflowY: 'auto',
-                                        }}>
-                                            <h2 style={{ textAlign: 'center', color: '#333' }}>Popular Topics</h2>
-                                            {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                                {topics.map((topic) => {
-                                                    const postCount = topic.posts?.items?.length || 0;
-                                                    return (
-                                                        <div
-                                                            key={topic.id}
-                                                            onClick={() => handleTopicClick(topic.id)}
-                                                            style={{
-                                                                backgroundColor: '#ffffff',
-                                                                padding: '15px',
-                                                                borderRadius: '5px',
-                                                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                                                                cursor: 'pointer',
-                                                                transition: 'transform 0.2s',
-                                                                border: postCount === 0 ? '1px dashed #ccc' : '1px solid #eee',
-                                                                display: 'flex',
-                                                                justifyContent: 'space-between',
-                                                                alignItems: 'center'
-                                                            }}>
-                                                            <div>
-                                                                <h3 style={{ margin: '0', color: '#333' }}>{topic.title}</h3>
-                                                                {postCount === 0 && (
-                                                                    <p style={{
-                                                                        margin: '5px 0 0 0',
-                                                                        color: '#666',
-                                                                        fontSize: '0.9em',
-                                                                        fontStyle: 'italic'
-                                                                    }}>
-                                                                        No posts yet - Be the first to contribute!
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                            <div style={{
-                                                                backgroundColor: postCount === 0 ? '#f5f5f5' : '#e8f5e9',
-                                                                color: postCount === 0 ? '#666' : '#2e7d32',
-                                                                padding: '4px 8px',
-                                                                borderRadius: '12px',
-                                                                fontSize: '0.9em',
-                                                                fontWeight: 'bold'
-                                                            }}>
-                                                                {postCount} {postCount === 1 ? 'post' : 'posts'}
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        onClick={handleBackButtonClick}
-                                        style={{
-                                            position: 'fixed',
-                                            bottom: '20px',
-                                            left: '20px',
-                                            fontSize: '0.8rem',
-                                            padding: '5px 10px',
-                                        }}>
-                                        Back
-                                    </button>
-                                </div>
-                            )}
-
-                            {selectedTopicId && userId && (
-                                <TopicPage
-                                    topicId={selectedTopicId}
-                                    userId={userId}
-                                    onBack={() => setSelectedTopicId(null)}
+                {state.showHomeContent && !state.selectedTopicId && (
+                    <div className="home-content">
+                        <div className="home-content-container">
+                            {/* Left side - Topic Creation */}
+                            <div className="topic-creation-section">
+                                <label htmlFor="topicInput">Create New Topic</label>
+                                <input
+                                    id="topicInput"
+                                    type="text"
+                                    placeholder="Type your topic here..."
+                                    value={state.topic}
+                                    onChange={handleInputChange}
+                                    className="topic-input"
                                 />
-                            )}
-                        </main>
-                    );
-                }}
-            </Authenticator>
+                                <button
+                                    onClick={handleCreateTopic}
+                                    disabled={state.isLoading}
+                                    className="create-topic-button"
+                                >
+                                    {state.isLoading ? 'Creating...' : 'Create Topic'}
+                                </button>
+
+                                <label htmlFor="postInput">Search</label>
+                                <input
+                                    id="postInput"
+                                    type="text"
+                                    placeholder="Type your search here..."
+                                    className="search-input"
+                                />
+                            </div>
+
+                            {/* Right side - Topics List */}
+                            <div className="topics-list-section">
+                                <h2>Popular Topics</h2>
+                                {state.error && (
+                                    <div className="error-message">{state.error}</div>
+                                )}
+                                {state.isLoading ? (
+                                    <div className="loading-spinner">Loading...</div>
+                                ) : (
+                                    <div className="topics-grid">
+                                        {state.topics.map((topic) => {
+                                            const postCount = topic.posts?.items?.length || 0;
+                                            return (
+                                                <div
+                                                    key={topic.id}
+                                                    onClick={() => handleTopicClick(topic.id)}
+                                                    className={`topic-item ${postCount === 0 ? 'empty-topic' : ''}`}
+                                                >
+                                                    <div className="topic-details">
+                                                        <h3>{topic.title}</h3>
+                                                        {postCount === 0 && (
+                                                            <p className="no-posts-text">
+                                                                No posts yet - Be the first to contribute!
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <div className={`post-count ${postCount === 0 ? 'empty' : 'active'}`}>
+                                                        {postCount} {postCount === 1 ? 'post' : 'posts'}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={handleBackButtonClick}
+                            className="back-button"
+                        >
+                            ← Back to Menu
+                        </button>
+                    </div>
+                )}
+
+                {state.selectedTopicId && userId && (
+                    <TopicPage
+                        topicId={state.selectedTopicId}
+                        userId={userId}
+                        onBack={() => dispatch({ type: 'SET_SELECTED_TOPIC', payload: null })}
+                    />
+                )}
+            </main>
         </div>
     );
 }
