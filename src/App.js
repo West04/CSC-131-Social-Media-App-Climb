@@ -290,7 +290,7 @@ function App({ user, signOut }) {
                 {state.selectedTopicId && userId && (
                     <TopicPage
                         topicId={state.selectedTopicId}
-                        userId={userId}
+                        userId="6db1c7c5-17eb-4a87-a53b-29bfbce2eb11"
                         onBack={() => dispatch({ type: 'SET_SELECTED_TOPIC', payload: null })}
                     />
                 )}
