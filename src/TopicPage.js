@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { GetTopicWithPosts } from './graphql/custom-queries';
 import { createPost, updatePost } from './graphql/mutations';
+import './TopicPageNatureTheme.css';
 
 const client = generateClient();
 

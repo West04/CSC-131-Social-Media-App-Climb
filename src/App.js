@@ -1,68 +1,76 @@
-import React, { useState, useEffect, useReducer } from 'react';
-import './App.css';
-import { Authenticator, withAuthenticator } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
-import awsExports from './aws-exports';
-import { Amplify } from 'aws-amplify';
-import { generateClient } from 'aws-amplify/api';
-import { createTopic } from "./graphql/mutations";
-import { ListTopicsWithPosts } from "./graphql/custom-queries";
-import TopicPage from './TopicPage';
-import './TopicPageNatureTheme.css';
+// Importing necessary libraries and components
+import React, { useState, useEffect, useReducer } from 'react'; // React utilities for state and lifecycle management
+import './App.css'; // Main CSS file for styling the app
+import { withAuthenticator } from '@aws-amplify/ui-react'; // Higher-order component for Amplify authentication
+import '@aws-amplify/ui-react/styles.css'; // Styles for Amplify UI components
+import awsExports from './aws-exports'; // AWS Amplify configuration file
+import { Amplify } from 'aws-amplify'; // Core Amplify library
+import { generateClient } from 'aws-amplify/api'; // Utility to create a GraphQL client
+import { createTopic } from "./graphql/mutations"; // GraphQL's mutation to create a topic
+import { ListTopicsWithPosts } from "./graphql/custom-queries"; // Custom GraphQL query to fetch topics with posts
+import TopicPage from './TopicPage'; // Component for rendering topic-specific pages
 
-
-// Initialize Amplify
+// Configuring AWS Amplify with the settings from aws-exports
 Amplify.configure(awsExports);
+
+// Generating a GraphQL client instance for API calls
 const client = generateClient();
 
-// Initial state for the app
+// Initial state structure for the application
 const initialState = {
-    backgroundColor: '#f0f0f0',
-    showHomeContent: false,
-    showInitContent: true,
-    topic: '',
-    topics: [],
-    selectedTopicId: null,
-    error: null,
-    isLoading: false
+    backgroundColor: '#f0f0f0', // Default background color
+    showHomeContent: false, // Whether to show the home content
+    showInitContent: true, // Whether to show the initial welcome content
+    topic: '', // Input field value for creating a new topic
+    topics: [], // List of topics fetched from the server
+    selectedTopicId: null, // ID of the currently selected topic
+    error: null, // Error message for display
+    isLoading: false // Loading state for async operations
 };
 
-// Reducer function to manage complex state
+// Reducer function to manage application state transitions
 function appReducer(state, action) {
     switch (action.type) {
         case 'SET_HOME_CONTENT':
+            // Toggles between home content and initial screen
             return {
                 ...state,
                 showHomeContent: action.payload,
                 showInitContent: !action.payload
             };
         case 'SET_SELECTED_TOPIC':
+            // Updates the currently selected topic ID
             return {
                 ...state,
                 selectedTopicId: action.payload
             };
         case 'SET_TOPICS':
+            // Updates the list of topics and clears errors
             return {
                 ...state,
                 topics: action.payload,
                 error: null
             };
         case 'SET_ERROR':
+            // Sets an error message for display
             return {
                 ...state,
                 error: action.payload
             };
         case 'SET_LOADING':
+            // Toggles the loading state
             return {
                 ...state,
                 isLoading: action.payload
             };
         case 'SET_TOPIC_INPUT':
+            // Updates the topic input field
             return {
                 ...state,
                 topic: action.payload
             };
         case 'RESET_TOPIC_INPUT':
+            // Clears the topic input field
             return {
                 ...state,
                 topic: ''
@@ -73,26 +81,30 @@ function appReducer(state, action) {
 }
 
 function App({ user, signOut }) {
+    // useReducer hook to manage the state using the reducer function
     const [state, dispatch] = useReducer(appReducer, initialState);
+
+    // State for storing the authenticated user's ID
+    // For testing purposes set to "7f2c6cd3-82df-41a8-bc82-152538968f51"
     const [userId, setUserId] = useState("7f2c6cd3-82df-41a8-bc82-152538968f51");
 
-    // Update user ID when authenticated
+    // Updates the user ID when the user logs in
     useEffect(() => {
         if (user?.attributes?.sub) {
             const currentUserId = user.attributes.sub;
             setUserId(currentUserId);
-            localStorage.setItem('userId', currentUserId);
+            localStorage.setItem('userId', currentUserId); // Cache user ID in localStorage
         }
     }, [user]);
 
-    // Fetch topics when home content is shown
+    // Fetches topics when the home content is toggled
     useEffect(() => {
         if (state.showHomeContent) {
             fetchTopics();
         }
     }, [state.showHomeContent]);
 
-    // Update userId from local storage on initial load
+    // Initializes user ID from local storage (if available) on app load
     useEffect(() => {
         const storedUserId = localStorage.getItem('userId');
         if (storedUserId) {
@@ -100,41 +112,43 @@ function App({ user, signOut }) {
         }
     }, []);
 
-    // Fetch topics from backend
+    // Function to fetch topics from the server
     const fetchTopics = async () => {
-        dispatch({ type: 'SET_LOADING', payload: true });
-        dispatch({ type: 'SET_ERROR', payload: null });
+        dispatch({ type: 'SET_LOADING', payload: true }); // Set loading state
+        dispatch({ type: 'SET_ERROR', payload: null }); // Clear previous errors
 
         try {
             const topicData = await client.graphql({
-                query: ListTopicsWithPosts
+                query: ListTopicsWithPosts // Execute GraphQL query
             });
             dispatch({
                 type: 'SET_TOPICS',
-                payload: topicData.data.listTopics.items
+                payload: topicData.data.listTopics.items // Update topics state
             });
         } catch (error) {
             console.error("Error fetching topics:", error);
             dispatch({
                 type: 'SET_ERROR',
-                payload: "Failed to load topics. Please try again later."
+                payload: "Failed to load topics. Please try again later." // Show error message
             });
         } finally {
-            dispatch({ type: 'SET_LOADING', payload: false });
+            dispatch({ type: 'SET_LOADING', payload: false }); // End loading state
         }
     };
 
-    // Handlers for different page navigation
+    // Navigates to the home page content
     const handleHomePageClick = () => {
         dispatch({ type: 'SET_HOME_CONTENT', payload: true });
-        dispatch({ type: 'SET_SELECTED_TOPIC', payload: null });
+        dispatch({ type: 'SET_SELECTED_TOPIC', payload: null }); // Deselect any topic
     };
 
+    // Navigates back to the initial screen
     const handleBackButtonClick = () => {
         dispatch({ type: 'SET_HOME_CONTENT', payload: false });
         dispatch({ type: 'SET_SELECTED_TOPIC', payload: null });
     };
 
+    // Updates the topic input field when the user types
     const handleInputChange = (event) => {
         dispatch({
             type: 'SET_TOPIC_INPUT',
@@ -142,11 +156,12 @@ function App({ user, signOut }) {
         });
     };
 
-    // Create new topic
+    // Handles the creation of a new topic
     const handleCreateTopic = async () => {
-        const trimmedTopic = state.topic.trim();
+        const trimmedTopic = state.topic.trim(); // Remove unnecessary whitespace
 
         if (trimmedTopic === '') {
+            // Display an error if the input is empty
             dispatch({
                 type: 'SET_ERROR',
                 payload: "Please enter a topic."
@@ -157,18 +172,15 @@ function App({ user, signOut }) {
         dispatch({ type: 'SET_LOADING', payload: true });
 
         try {
+            // Create the topic using a GraphQL mutation
             await client.graphql({
                 query: createTopic,
                 variables: { input: { title: trimmedTopic } }
             });
 
-            dispatch({ type: 'RESET_TOPIC_INPUT' });
-            dispatch({ type: 'SET_ERROR', payload: null });
-
-            // Refetch topics to update list
-            await fetchTopics();
-
-            alert("Topic created successfully!");
+            dispatch({ type: 'RESET_TOPIC_INPUT' }); // Clear input
+            dispatch({ type: 'SET_ERROR', payload: null }); // Clear errors
+            await fetchTopics(); // Refresh the topics list
         } catch (error) {
             console.error("Error creating topic:", error);
             dispatch({
@@ -180,16 +192,15 @@ function App({ user, signOut }) {
         }
     };
 
-    // Handle topic selection
+    // Handles the selection of a topic
     const handleTopicClick = (topicId) => {
-        console.log("Selected Topic ID:", topicId);
-        console.log("Current User ID:", userId);
-        dispatch({ type: 'SET_SELECTED_TOPIC', payload: topicId });
+        dispatch({ type: 'SET_SELECTED_TOPIC', payload: topicId }); //
     };
 
     return (
         <div className="App">
             <main>
+                {/* Initial content (Menu Screen) - navigation buttons */}
                 {state.showInitContent && (
                     <header className='App-header'>
                         {['Home Page', 'Followed Topics', 'For You', 'Your Posts'].map((buttonText) => (
@@ -210,10 +221,12 @@ function App({ user, signOut }) {
                     </header>
                 )}
 
+                {/* Home content - topic creation and list */}
                 {state.showHomeContent && !state.selectedTopicId && (
                     <div className="home-content">
+                        {/* Content sections */}
                         <div className="home-content-container">
-                            {/* Left side - Topic Creation */}
+                            {/* Topic creation section */}
                             <div className="topic-creation-section">
                                 <label htmlFor="topicInput">Create New Topic</label>
                                 <input
@@ -231,17 +244,9 @@ function App({ user, signOut }) {
                                 >
                                     {state.isLoading ? 'Creating...' : 'Create Topic'}
                                 </button>
-
-                                <label htmlFor="postInput">Search</label>
-                                <input
-                                    id="postInput"
-                                    type="text"
-                                    placeholder="Type your search here..."
-                                    className="search-input"
-                                />
                             </div>
 
-                            {/* Right side - Topics List */}
+                            {/* Topics list section */}
                             <div className="topics-list-section">
                                 <h2>Popular Topics</h2>
                                 {state.error && (
@@ -287,6 +292,7 @@ function App({ user, signOut }) {
                     </div>
                 )}
 
+                {/* Topic-specific content */}
                 {state.selectedTopicId && userId && (
                     <TopicPage
                         topicId={state.selectedTopicId}
