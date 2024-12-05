@@ -200,20 +200,22 @@ function App({ user, signOut }) {
     return (
         <div className="App">
             <main>
-                {/* Initial content (Menu Screen) - navigation buttons */}
+                {/* Initial content (Menu Screen) with navigation buttons */}
                 {state.showInitContent && (
                     <header className='App-header'>
+                        {/* Render navigation buttons dynamically from an array */}
                         {['Home Page', 'Followed Topics', 'For You', 'Your Posts'].map((buttonText) => (
                             <button
-                                key={buttonText}
-                                onClick={handleHomePageClick}
+                                key={buttonText} // Unique key for React's reconciliation
+                                onClick={handleHomePageClick} // Click handler for navigation
                                 className="nav-button"
                             >
-                                {buttonText}
+                                {buttonText} {/* Display button label */}
                             </button>
                         ))}
+                        {/* Sign Out button */}
                         <button
-                            onClick={signOut}
+                            onClick={signOut} // Logs the user out
                             className="nav-button sign-out"
                         >
                             Sign Out
@@ -221,57 +223,71 @@ function App({ user, signOut }) {
                     </header>
                 )}
 
-                {/* Home content - topic creation and list */}
+                {/* Home content: Topic creation and topic list display */}
                 {state.showHomeContent && !state.selectedTopicId && (
                     <div className="home-content">
-                        {/* Content sections */}
                         <div className="home-content-container">
                             {/* Topic creation section */}
                             <div className="topic-creation-section">
                                 <label htmlFor="topicInput">Create New Topic</label>
+                                {/* Input field for entering a new topic */}
                                 <input
                                     id="topicInput"
                                     type="text"
-                                    placeholder="Type your topic here..."
-                                    value={state.topic}
-                                    onChange={handleInputChange}
+                                    placeholder="Type your topic here..." // Placeholder text for guidance
+                                    value={state.topic} // Controlled input bound to state
+                                    onChange={handleInputChange} // Updates state on input change
                                     className="topic-input"
                                 />
                                 <button
-                                    onClick={handleCreateTopic}
-                                    disabled={state.isLoading}
+                                    onClick={handleCreateTopic} // Triggers topic creation
+                                    disabled={state.isLoading} // Disables button while loading
                                     className="create-topic-button"
                                 >
-                                    {state.isLoading ? 'Creating...' : 'Create Topic'}
+                                    {state.isLoading ? 'Creating...' : 'Create Topic'} {/* Dynamic button label */}
                                 </button>
+
+                                {/* Search bar */}
+                                <label htmlFor="postInput">Search</label>
+                                <input
+                                    id="postInput"
+                                    type="text"
+                                    placeholder="Type your search here..." // Placeholder for search
+                                    className="search-input"
+                                />
                             </div>
 
                             {/* Topics list section */}
                             <div className="topics-list-section">
                                 <h2>Popular Topics</h2>
+                                {/* Error message display */}
                                 {state.error && (
                                     <div className="error-message">{state.error}</div>
                                 )}
+                                {/* Loading spinner */}
                                 {state.isLoading ? (
                                     <div className="loading-spinner">Loading...</div>
                                 ) : (
                                     <div className="topics-grid">
+                                        {/* Map over topics array to display individual topics */}
                                         {state.topics.map((topic) => {
-                                            const postCount = topic.posts?.items?.length || 0;
+                                            const postCount = topic.posts?.items?.length || 0; // Calculate the number of posts
                                             return (
                                                 <div
-                                                    key={topic.id}
-                                                    onClick={() => handleTopicClick(topic.id)}
+                                                    key={topic.id} // Unique key for each topic
+                                                    onClick={() => handleTopicClick(topic.id)} // Sets the selected topic
                                                     className={`topic-item ${postCount === 0 ? 'empty-topic' : ''}`}
                                                 >
+                                                    {/* Topic details */}
                                                     <div className="topic-details">
-                                                        <h3>{topic.title}</h3>
+                                                        <h3>{topic.title}</h3> {/* Display topic title */}
                                                         {postCount === 0 && (
                                                             <p className="no-posts-text">
                                                                 No posts yet - Be the first to contribute!
                                                             </p>
                                                         )}
                                                     </div>
+                                                    {/* Post count display */}
                                                     <div className={`post-count ${postCount === 0 ? 'empty' : 'active'}`}>
                                                         {postCount} {postCount === 1 ? 'post' : 'posts'}
                                                     </div>
@@ -283,8 +299,9 @@ function App({ user, signOut }) {
                             </div>
                         </div>
 
+                        {/* Back button to return to the menu */}
                         <button
-                            onClick={handleBackButtonClick}
+                            onClick={handleBackButtonClick} // Triggers back navigation
                             className="back-button"
                         >
                             ← Back to Menu
@@ -292,12 +309,12 @@ function App({ user, signOut }) {
                     </div>
                 )}
 
-                {/* Topic-specific content */}
+                {/* Topic-specific content: Displays detailed view of a selected topic */}
                 {state.selectedTopicId && userId && (
                     <TopicPage
-                        topicId={state.selectedTopicId}
-                        userId={userId}
-                        onBack={() => dispatch({ type: 'SET_SELECTED_TOPIC', payload: null })}
+                        topicId={state.selectedTopicId} // Passes the selected topic ID
+                        userId={userId} // Passes the current user ID
+                        onBack={() => dispatch({ type: 'SET_SELECTED_TOPIC', payload: null })} // Resets the selected topic
                     />
                 )}
             </main>

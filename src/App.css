@@ -1,4 +1,5 @@
 :root {
+  /* Color Variables: Provide a consistent, easily modifiable color scheme */
   --forest-green: #2C5F2D;
   --leaf-green: #97BC62;
   --bark-brown: #5D4037;
@@ -9,28 +10,42 @@
   --shadow-green: rgba(44, 95, 45, 0.1);
 }
 
+/* Main Application Container
+   - Ensures full-height layout
+   - Centers content
+   - Sets global font and background
+*/
 .App {
-  text-align: center;
-  min-height: 100vh;
-  background-color: var(--background-green);
-  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  text-align: center; /* Center-align all content within the app */
+  min-height: 100vh; /* Ensure app takes full viewport height */
+  background-color: var(--background-green);  /* Soft, natural green background */
+  font-family: 'Roboto', 'Segoe UI', sans-serif;  /* Modern, clean, and readable font stack */
 }
 
+/* Application Header
+   - Flexible layout for header content
+   - Provides visual separation with subtle shadow
+*/
 .App-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  background-color: var(--soft-white);
-  box-shadow: 0 4px 6px var(--shadow-green);
+  background-color: var(--soft-white);  /* Clean, off-white background */
+  box-shadow: 0 4px 6px var(--shadow-green);  /* Subtle elevation effect */
 }
 
+/* Navigation Buttons
+   - Consistent styling for all navigation buttons
+   - Includes hover and interaction states
+   - Responsive width and spacing
+*/
 .nav-button {
   padding: 12px 20px;
-  background-color: var(--leaf-green);
+  background-color: var(--leaf-green);  /* Bright, engaging green */
   border: none;
-  border-radius: 25px;
+  border-radius: 25px;  /* Fully rounded buttons for modern look */
   width: 250px;
   margin: 10px auto;
   font-size: 16px;
@@ -38,21 +53,33 @@
   color: white;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 3px 6px var(--shadow-green);
+  transition: all 0.3s ease;  /* Smooth transitions for interactions */
+  box-shadow: 0 3px 6px var(--shadow-green);  /* Subtle depth effect */
 }
 
+/* Navigation Button Hover State
+   - Provides visual feedback on user interaction
+   - Slightly darker background
+   - Lifting effect to suggest interactivity
+*/
 .nav-button:hover {
   background-color: var(--forest-green);
-  transform: translateY(-3px);
-  box-shadow: 0 5px 8px var(--shadow-green);
+  transform: translateY(-3px);  /* Subtle lifting animation */
+  box-shadow: 0 5px 8px var(--shadow-green);  /* Enhanced shadow on hover */
 }
 
+/* Sign-out Button
+   - Distinct styling to indicate a different, potentially cautionary action
+*/
 .sign-out {
-  background-color: #D32F2F;
+  background-color: #D32F2F;  /* Red color to signify logout/exit */
   color: white;
 }
 
+/* Home Content Container
+   - Full-height layout with gradient background
+   - Centered content positioning
+*/
 .home-content {
   height: 100vh;
   background: linear-gradient(135deg, var(--background-green) 0%, var(--light-forest) 100%);
@@ -62,6 +89,11 @@
   justify-content: center;
 }
 
+/* Home Content Internal Container
+   - Card-like design with rounded corners
+   - Flexible layout for content sections
+   - Responsive sizing
+*/
 .home-content-container {
   display: flex;
   background-color: var(--soft-white);
@@ -73,6 +105,11 @@
   height: 80vh;
 }
 
+/* Topic Creation and List Sections
+   - Shared flexible layout
+   - Equal width columns
+   - Centered content
+*/
 .topic-creation-section,
 .topics-list-section {
   flex: 1;
@@ -83,11 +120,19 @@
   position: relative;
 }
 
+/* Topic Creation Section
+   - Subtle green background
+   - Visual separation with border
+*/
 .topic-creation-section {
   background-color: rgba(151, 188, 98, 0.1);
   border-right: 2px solid var(--leaf-green);
 }
 
+/* Input Fields
+   - Consistent styling across different input types
+   - Focus states for interactive feedback
+*/
 .topic-input,
 .search-input {
   width: 100%;
@@ -101,6 +146,11 @@
   transition: all 0.3s ease;
 }
 
+/* Input Focus States
+   - Visual indication of active input
+   - No default outline
+   - Enhanced border and shadow
+*/
 .topic-input:focus,
 .search-input:focus {
   outline: none;
@@ -108,6 +158,9 @@
   box-shadow: 0 0 10px var(--shadow-green);
 }
 
+/* Create Topic Button
+   - Styled similarly to nav buttons
+*/
 .create-topic-button {
   background-color: var(--leaf-green);
   color: white;
@@ -126,11 +179,19 @@
   transform: translateY(-3px);
 }
 
+/* Topics List Section
+   - Scrollable container
+   - White background
+*/
 .topics-list-section {
   background-color: var(--soft-white);
   overflow-y: auto;
 }
 
+/* Topics Grid Layout
+   - Vertical stack of topic items
+   - Consistent spacing
+*/
 .topics-grid {
   display: flex;
   flex-direction: column;
@@ -139,6 +200,11 @@
   padding: 0 10px;
 }
 
+/* Individual Topic Item
+   - Card-like design
+   - Hover effects
+   - Left border accent
+*/
 .topic-item {
   background-color: white;
   padding: 20px;
@@ -157,11 +223,18 @@
   box-shadow: 0 6px 12px var(--shadow-green);
 }
 
+/* Empty Topic Styling
+   - Distinct visual indication for topics without content
+*/
 .topic-item.empty-topic {
   border-left-style: dashed;
   border-left-color: var(--light-forest);
 }
 
+/* Post Count Indicator
+   - Styled badge showing number of posts
+   - Different styles for empty and active states
+*/
 .post-count {
   padding: 6px 12px;
   border-radius: 20px;
@@ -179,6 +252,10 @@
   color: var(--forest-green);
 }
 
+/* Back Button
+   - Fixed position at bottom left
+   - Distinct styling from other buttons
+*/
 .back-button {
   position: fixed;
   bottom: 30px;
@@ -199,12 +276,20 @@
   transform: translateY(-3px);
 }
 
+/* Error Message
+   - Prominent red color for visibility
+   - Bold styling for emphasis
+*/
 .error-message {
   color: #D32F2F;
   margin: 20px 0;
   font-weight: bold;
 }
 
+/* Loading Spinner
+   - Centered placement
+   - Consistent color with theme
+*/
 .loading-spinner {
   display: flex;
   justify-content: center;
@@ -214,7 +299,10 @@
   font-size: 20px;
 }
 
-/* Scrollbar Styling for topics list */
+/* Custom Scrollbar for Topics List
+   - Integrates with the overall design
+   - Matches color scheme
+*/
 .topics-list-section::-webkit-scrollbar {
   width: 10px;
 }
