@@ -1,0 +1,202 @@
+/* Color Variables
+   - Carefully selected to create a cohesive, nature-inspired palette
+   - Allows easy global color management and theme modifications
+*/
+:root {
+    --forest-green: #2C5F2D;
+    --leaf-green: #97BC62;
+    --bark-brown: #5D4037;
+    --moss-green: #3E5B3B;
+    --light-forest: #A8C0CC;
+    --background-green: #E6F3E6;
+}
+
+/* Topic Page Container
+   - Provides a clean, card-like container for content
+   - Uses soft green background with subtle shadow
+*/
+.topic-page {
+    background-color: var(--background-green);
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Back Button
+   - Styled with earthy brown color
+   - Hover effect for improved interactivity
+   - Rounded design
+*/
+.back-button {
+    background-color: var(--bark-brown);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+    background-color: var(--forest-green);
+}
+
+/* Heading Styles
+   - Prominently displays page title
+   - Uses forest green color
+   - Underlined with leaf green
+*/
+h1 {
+    color: var(--forest-green);
+    border-bottom: 3px solid var(--leaf-green);
+    padding-bottom: 10px;
+}
+
+/* Create Post Section
+   - Soft, translucent green background
+   - Clearly delineated with leaf green border
+   - Provides a distinct area for post creation
+*/
+.create-post-section {
+    background-color: rgba(151, 188, 98, 0.1);
+    border: 1px solid var(--leaf-green);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+/* Input Group
+   - Provides consistent spacing between form elements
+*/
+.input-group {
+    margin-bottom: 15px;
+}
+
+/* Input Fields
+   - Consistent styling for text inputs
+   - Moss green border for default state
+   - Focus state with forest green border and subtle shadow
+*/
+.post-title-input,
+.post-content-input {
+    width: 100%;
+    border: 2px solid var(--moss-green);
+    border-radius: 6px;
+    padding: 10px;
+    background-color: white;
+}
+
+.post-title-input:focus,
+.post-content-input:focus {
+    outline: none;
+    border-color: var(--forest-green);
+    box-shadow: 0 0 5px rgba(44, 95, 45, 0.3);
+}
+
+/* Create Post Button
+   - Prominent button for submitting new posts
+   - Leaf green background
+   - Hover effect changes to forest green
+*/
+.create-post-button {
+    background-color: var(--leaf-green);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-post-button:hover {
+    background-color: var(--forest-green);
+}
+
+/* Posts List Container
+   - White background for content clarity
+   - Subtle shadow and rounded corners
+*/
+.posts-list {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Individual Post Item
+   - Left border accent in leaf green
+   - Soft green background
+   - Rounded corners
+*/
+.post-item {
+    border-left: 4px solid var(--leaf-green);
+    padding-left: 15px;
+    margin-bottom: 20px;
+    background-color: var(--background-green);
+    border-radius: 8px;
+}
+
+.post-item h3 {
+    color: var(--forest-green);
+    margin-bottom: 10px;
+}
+
+/* Post Metadata
+   - Flexbox layout for even spacing
+   - Muted green color for secondary information
+   - Slightly smaller font size
+*/
+.post-metadata {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--moss-green);
+    font-size: 0.9em;
+}
+
+/* Like Button
+   - Minimalist design
+   - Subtle scale animation on hover
+*/
+.like-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: transform 0.2s ease;
+}
+
+.like-button:hover {
+    transform: scale(1.1);
+}
+
+/* Error Handling Styles
+   - Prominent red color for error messages
+   - Visual indication of input errors
+*/
+.error-text {
+    color: #D32F2F;
+    font-size: 0.8em;
+    margin-top: 5px;
+}
+
+.input-error {
+    border-color: #D32F2F;
+}
+
+/* Empty State and Loading Styles
+   - Provides visual feedback when no content is available
+   - Consistent with overall design theme
+*/
+.no-posts-message {
+    color: var(--moss-green);
+    font-style: italic;
+    text-align: center;
+}
+
+.loading-spinner {
+    color: var(--forest-green);
+    text-align: center;
+    padding: 20px;
+}
