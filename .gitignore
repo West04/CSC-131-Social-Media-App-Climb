@@ -4,7 +4,7 @@
 .pnp.js
 
 # Amplify Folder
-amplify/
+# amplify/
 
 # Testing and Production
 /coverage
